@@ -98,5 +98,11 @@ class CreateFadeMaskAdvanced:
 if __name__=="__main__":
     # Test node
     test_func = CreateFadeMaskAdvanced()
-    fade_mask = test_func.createfademask(frames=96, width=512, height=512, invert=False, points_string="0:(1.0),\n20:(1.0),\n24:(0.0)\n92:(0.0)\n96:(1.0)", interpolation='linear')
-    print(fade_mask.shape)
+    fade_mask = test_func.createfademask(frames=96, width=512, height=512, invert=False, points_string="0:(1.0),\n20:(1.0),\n24:(0.0),\n92:(0.0),\n96:(1.0)\n", interpolation='linear')
+    # print(fade_mask[0].shape, fade_mask[0].max(), fade_mask[0].min())
+    fade_mask = fade_mask[0]
+    from PIL import Image
+    fade_mask = (fade_mask*255.0).unsqueeze(-1).repeat(1,1,1,3).chunk(12)
+    fade_mask = [torch.cat(item.chunk(8), dim=2).squeeze(0) for item in fade_mask]
+    fade_mask = torch.cat(fade_mask, dim=0)
+    Image.fromarray(fade_mask.numpy().astype(np.uint8)).save("./test.png")
